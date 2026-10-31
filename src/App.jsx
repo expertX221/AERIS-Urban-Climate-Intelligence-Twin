@@ -310,7 +310,14 @@ export function App() {
         if (e.target.closest("button,a")) clickSound(sound);
       }}
     >
-      <a href="#main" className="skip-link">
+      <a
+        href="#main"
+        className="skip-link"
+        onClick={(event) => {
+          event.preventDefault();
+          document.getElementById("main")?.focus();
+        }}
+      >
         Skip to content
       </a>
       <header className="header">
@@ -402,7 +409,7 @@ export function App() {
         </div>
       </div>
       {!app ? (
-        <main id="main">
+        <main id="main" tabIndex={-1}>
           <section className="hero" aria-labelledby="hero-title">
             <img
               className="hero-image"
@@ -581,7 +588,7 @@ export function App() {
           </section>
         </main>
       ) : (
-        <main className="workspace" id="main">
+        <main className="workspace" id="main" tabIndex={-1}>
           <nav className="workspace-nav" aria-label="Climate scene">
             {chapters.map((c, i) => {
               const Icon = icons[i];
