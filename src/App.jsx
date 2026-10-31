@@ -1090,8 +1090,7 @@ export function App() {
                 <a
                   className="text-button"
                   href={scenarioLink()}
-                  target="_blank"
-                  rel="noreferrer"
+                  onClick={() => setModal(null)}
                 >
                   Open shared scenario <ArrowUpRight size={16} />
                 </a>

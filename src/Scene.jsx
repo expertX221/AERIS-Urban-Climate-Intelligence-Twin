@@ -56,7 +56,7 @@ export function Scene({
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.1;
       renderer.shadowMap.enabled = true;
-      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.type = THREE.PCFShadowMap;
       host.appendChild(renderer.domElement);
       renderer.domElement.setAttribute(
         "aria-label",
@@ -289,7 +289,18 @@ export function Scene({
           (-(e.clientY - r.top) / r.height) * 2 + 1,
         );
         ray.setFromCamera(pointer, camera);
-        const hit = ray.intersectObject(current, true)[0];
+        const hits = ray.intersectObject(current, true);
+        const nearest = hits[0];
+        // Decorative frame batches sit just above the building faces.
+        // Resolve the underlying semantic object rather than selecting the trim.
+        const hit =
+          hits.find(
+            (h) =>
+              h.distance <= (nearest?.distance ?? 0) + 0.4 &&
+              /^(Building_\d+|Tree_canopy|River_corridor|Flood_extent|Rain_garden)/.test(
+                h.object.name,
+              ),
+          ) || nearest;
         if (!hit) return;
         if (selected && originals.has(selected))
           selected.material.emissive.copy(originals.get(selected));
