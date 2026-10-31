@@ -67,3 +67,13 @@ A research extension needs local terrain and building data, documented land cove
 - Scaffold: OpenAI Product Design prototype template, retained hosting runtime files.
 
 See `docs/submission.md` for a submission-ready project summary and demo flow, and `design-qa.md` for verification status. AI tools were used for code and visual assets; participants must review and understand the implementation before submission.
+
+## Version 0.3 — scenario workbench
+
+- Open **Scenario library & comparison** in the workspace to save up to eight named scenarios on this device. Existing single-save and restore controls still work independently.
+- Import an exported version 1 AERIS JSON scenario (up to 64 KB). Inputs must be finite numbers within the documented ranges. Scene and palette are restored; supplied output values are ignored and recalculated.
+- Compare original baseline, current inputs and named scenarios in one accessible table; export that comparison as a CSV with spreadsheet formula protection.
+- Results now include an equal-rainfall comparison: original land cover and current land cover are evaluated at the same rainfall. This isolates intervention changes within the invented heuristic, rather than attributing a different storm to land-cover changes.
+- Corrected implementation links to the current repository and hardened saved-input handling for null values.
+
+Library entries remain browser-local. Export the current scenario JSON before moving devices or clearing browser data. Removing a library entry does not affect the current workspace or the independent single-save slot.

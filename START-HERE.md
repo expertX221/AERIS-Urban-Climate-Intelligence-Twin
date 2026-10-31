@@ -28,3 +28,7 @@ The VS Code **Run and Debug → Start AERIS** configuration starts the same serv
 - `npm run build`: production output in `dist/client`.
 
 The opening artwork is a cinematic illustration. The explorer uses actual Blender geometry. All climate responses are invented demonstration values, not calibrated forecasts. See README and the Method dialog for the equations and limitations.
+
+## New scenario library
+
+In the workspace, open **Scenario library & comparison**. Name and save the current inputs, load a named option, or import a previously exported AERIS scenario JSON file. The comparison table and CSV include baseline, current scenario and all library entries. Results reports also show land-cover changes at equal rainfall. All results remain synthetic demonstration values.

@@ -97,6 +97,7 @@ export function scenarioReport(input) {
   };
 }
 export function sanitize(input = {}) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) input = {};
   return Object.fromEntries(
     Object.entries(defaults).map(([k, v]) => [
       k,

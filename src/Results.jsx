@@ -5,8 +5,10 @@ import {
   Info,
 } from "@phosphor-icons/react";
 import { baseline, scenarioReport } from "./domain.js";
+import { equalRainfallComparison } from "./library.js";
 export function Results({ parameters, name, onMethod, compact = false }) {
   const r = scenarioReport(parameters);
+  const equal = equalRainfallComparison(parameters);
   return (
     <section
       className={`scenario-results ${compact ? "compact-results" : ""}`}
@@ -67,6 +69,23 @@ export function Results({ parameters, name, onMethod, compact = false }) {
             {r.runoffDelta}
           </span>
         </div>
+      </div>
+      <div className="equal-rainfall">
+        <h4>Compare at equal rainfall</h4>
+        <p>
+          Original land cover at {parameters.rainfall} mm rain: runoff index{" "}
+          <strong>{equal.reference.runoff}</strong>. Your land cover at the same
+          rainfall: <strong>{equal.current.runoff}</strong>.
+        </p>
+        <p>
+          Intervention-only change:{" "}
+          <strong>
+            {equal.runoffDelta > 0 ? "+" : ""}
+            {equal.runoffDelta}
+          </strong>{" "}
+          index points. This separates the demonstration's land-cover response
+          from changes in rainfall.
+        </p>
       </div>
       <div className="response-meter">
         <span>

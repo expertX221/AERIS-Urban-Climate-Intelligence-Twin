@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { SceneBoundary } from "./SceneBoundary.jsx";
 import { Results } from "./Results.jsx";
+import { ScenarioLibrary } from "./ScenarioLibrary.jsx";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -314,6 +315,16 @@ export function App() {
   const share = () => {
     setShareCopied(false);
     setModal("share");
+  };
+  const loadLibraryScenario = (data, name) => {
+    setParameters(sanitize(data.parameters));
+    setChapter(data.chapter);
+    choosePalette(data.palette);
+    setComparison(false);
+    setSaved(false);
+    setPresetName(name);
+    setModal(null);
+    notify("Scenario loaded. Results recalculated from its inputs.");
   };
   const loadSaved = () => {
     try {
@@ -670,7 +681,7 @@ export function App() {
                 Methodology & limitations <ArrowUpRight size={15} />
               </button>
               <a
-                href="https://github.com/expertX221/AERIS-"
+                href="https://github.com/expertX221/AERIS-Urban-Climate-Intelligence-Twin"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -825,6 +836,9 @@ export function App() {
             <button className="load-saved text-button" onClick={loadSaved}>
               <FloppyDisk size={15} /> Restore saved scenario
             </button>
+            <button className="load-saved text-button" onClick={() => setModal("library")}>
+              <FloppyDisk size={15} /> Scenario library &amp; comparison
+            </button>
             <div className="save-row">
               <button className="primary-button" onClick={save}>
                 <Check size={17} />{" "}
@@ -947,7 +961,9 @@ export function App() {
         <Modal
           key={modal}
           title={
-            modal === "research"
+            modal === "library"
+              ? "Your scenario library"
+              : modal === "research"
               ? "Possibilities, with assumptions in view."
               : modal === "share"
                 ? "Share this scenario"
@@ -959,7 +975,9 @@ export function App() {
           }
           onClose={() => setModal(null)}
         >
-          {modal === "results" ? (
+          {modal === "library" ? (
+            <ScenarioLibrary parameters={parameters} chapter={chapter} palette={palette} onLoad={loadLibraryScenario} notify={notify} />
+          ) : modal === "results" ? (
             <>
               <Results
                 parameters={parameters}
@@ -1064,7 +1082,7 @@ export function App() {
               </p>
               <a
                 className="text-button"
-                href="https://github.com/expertX221/AERIS-"
+                href="https://github.com/expertX221/AERIS-Urban-Climate-Intelligence-Twin"
                 target="_blank"
                 rel="noreferrer"
               >
