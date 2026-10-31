@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { SceneBoundary } from "./SceneBoundary.jsx";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -366,26 +367,28 @@ export function App() {
           ORIGINAL 3D DISTRICT{" "}
           <span className="stage-caption-detail">BLENDER → GLTF</span>
         </div>
-        <Suspense
-          fallback={
-            <div className="scene-status" role="status">
-              Preparing 3D explorer…
-            </div>
-          }
-        >
-          {(show3d || sceneStarted) && (
-            <Scene
-              chapter={chapter}
-              progress={Math.max(0, scroll - 1)}
-              active={show3d}
-              app={app}
-              motion={motion}
-              parameters={comparison ? defaults : parameters}
-              onSelect={inspect}
-              onStatus={setSceneStatus}
-            />
-          )}
-        </Suspense>
+        <SceneBoundary onError={setSceneStatus}>
+          <Suspense
+            fallback={
+              <div className="scene-status" role="status">
+                Preparing 3D explorer…
+              </div>
+            }
+          >
+            {(show3d || sceneStarted) && (
+              <Scene
+                chapter={chapter}
+                progress={Math.max(0, scroll - 1)}
+                active={show3d}
+                app={app}
+                motion={motion}
+                parameters={comparison ? defaults : parameters}
+                onSelect={inspect}
+                onStatus={setSceneStatus}
+              />
+            )}
+          </Suspense>
+        </SceneBoundary>
         <div className="stage-footer">
           <span>ILLUSTRATIVE DISTRICT · SIMULATED SCENARIO</span>
           <button
