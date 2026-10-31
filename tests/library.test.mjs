@@ -4,7 +4,6 @@ import {
   importScenario,
   readLibrary,
   equalRainfallComparison,
-  comparisonCsv,
 } from "../src/library.js";
 import { defaults, sanitize } from "../src/domain.js";
 const valid = {
@@ -64,11 +63,30 @@ test("library recovers from damaged storage and rejects invalid entries", () => 
   );
   assert.deepEqual(sanitize(null), defaults);
 });
-test("CSV recalculates outputs, escapes names and blocks formulas", () => {
-  const csv = comparisonCsv([
-    { name: '=SUM(1,2)"\nnew', parameters: defaults, results: { surface: 0 } },
-  ]);
-  assert.ok(csv.includes('"\'=SUM(1,2)""\nnew"'));
-  assert.ok(csv.includes("41.8"));
-  assert.ok(csv.includes("not a validated forecast"));
+test("PDF reports contain recalculated results and model limitations", async () => {
+  const { createScenarioPdf, createComparisonPdf } = await import(
+    "../src/pdf.js"
+  );
+  const report = createScenarioPdf({
+    parameters: { ...defaults, rainfall: 120 },
+    name: "Cloudburst",
+  });
+  const pdf = report.output();
+  assert.ok(pdf.startsWith("%PDF-"));
+  assert.ok(pdf.includes("Equal-rainfall comparison"));
+  assert.ok(pdf.includes("144"));
+  assert.ok(pdf.includes("Not a validated climate forecast"));
+  assert.equal(report.getNumberOfPages(), 1);
+  const comparison = createComparisonPdf(
+    Array.from({ length: 10 }, (_, i) => ({
+      name: "Option " + i,
+      parameters: defaults,
+    })),
+  );
+  assert.equal(comparison.getNumberOfPages(), 1);
+  assert.ok(comparison.output().includes("Option 9"));
+  assert.ok(
+    comparison.internal.pageSize.getWidth() >
+      comparison.internal.pageSize.getHeight(),
+  );
 });

@@ -70,39 +70,3 @@ export function equalRainfallComparison(input) {
     temperatureDelta: +(current.surface - reference.surface).toFixed(1),
   };
 }
-export function comparisonCsv(rows) {
-  const cell = (value) => {
-    let s = String(value);
-    if (/^\s*[=+@-]/.test(s)) s = "'" + s;
-    return '"' + s.replaceAll('"', '""') + '"';
-  };
-  const header = [
-    "Scenario",
-    "Canopy %",
-    "Cool roofs %",
-    "Permeable ground %",
-    "Rainfall mm",
-    "Illustrative surface C",
-    "Illustrative runoff index",
-    "Data type",
-  ];
-  return [
-    header,
-    ...rows.map((row) => {
-      const p = sanitize(row.parameters),
-        r = evaluateScenario(p);
-      return [
-        row.name,
-        p.canopy,
-        p.roofs,
-        p.drainage,
-        p.rainfall,
-        r.surface,
-        r.runoff,
-        "Synthetic heuristic; not a validated forecast",
-      ];
-    }),
-  ]
-    .map((row) => row.map(cell).join(","))
-    .join("\r\n");
-}

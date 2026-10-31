@@ -353,29 +353,19 @@ export function App() {
     setPresetName(preset.name);
     setModal("results");
   };
-  const exportScenario = () => {
-    const data = {
-        project: "AERIS — Urban Climate Intelligence Twin",
-        version: 1,
-        dataType: "illustrative-simulated",
+  const exportScenario = async () => {
+    try {
+      const { createScenarioPdf } = await import("./pdf.js");
+      createScenarioPdf({
         parameters,
-        results,
+        name: presetName,
         chapter,
         palette,
-        limitations:
-          "Heuristic demonstration only. Not a validated forecast. No calibrated measurements.",
-        createdAt: new Date().toISOString(),
-      },
-      blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
-      }),
-      url = URL.createObjectURL(blob),
-      a = document.createElement("a");
-    a.href = url;
-    a.download = "aeris-scenario.json";
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 500);
-    notify("Scenario exported.");
+      }).save("aeris-scenario-report.pdf");
+      notify("PDF report downloaded.");
+    } catch {
+      notify("PDF export failed. Please try again.");
+    }
   };
   const setParam = (k, v) => {
     setSaved(false);
@@ -836,7 +826,10 @@ export function App() {
             <button className="load-saved text-button" onClick={loadSaved}>
               <FloppyDisk size={15} /> Restore saved scenario
             </button>
-            <button className="load-saved text-button" onClick={() => setModal("library")}>
+            <button
+              className="load-saved text-button"
+              onClick={() => setModal("library")}
+            >
               <FloppyDisk size={15} /> Scenario library &amp; comparison
             </button>
             <div className="save-row">
@@ -854,7 +847,7 @@ export function App() {
               <button
                 className="round-button"
                 onClick={exportScenario}
-                aria-label="Export scenario JSON"
+                aria-label="Download scenario PDF"
               >
                 <DownloadSimple size={18} />
               </button>
@@ -964,19 +957,25 @@ export function App() {
             modal === "library"
               ? "Your scenario library"
               : modal === "research"
-              ? "Possibilities, with assumptions in view."
-              : modal === "share"
-                ? "Share this scenario"
-                : modal === "results"
-                  ? "Make the difference visible."
-                  : modal === "appearance"
-                    ? "A different light on your city."
-                    : selected.title
+                ? "Possibilities, with assumptions in view."
+                : modal === "share"
+                  ? "Share this scenario"
+                  : modal === "results"
+                    ? "Make the difference visible."
+                    : modal === "appearance"
+                      ? "A different light on your city."
+                      : selected.title
           }
           onClose={() => setModal(null)}
         >
           {modal === "library" ? (
-            <ScenarioLibrary parameters={parameters} chapter={chapter} palette={palette} onLoad={loadLibraryScenario} notify={notify} />
+            <ScenarioLibrary
+              parameters={parameters}
+              chapter={chapter}
+              palette={palette}
+              onLoad={loadLibraryScenario}
+              notify={notify}
+            />
           ) : modal === "results" ? (
             <>
               <Results
@@ -992,7 +991,7 @@ export function App() {
                   Explore this scenario <ArrowRight size={18} />
                 </button>
                 <button className="text-button" onClick={exportScenario}>
-                  Export results <DownloadSimple size={16} />
+                  Download PDF report <DownloadSimple size={16} />
                 </button>
               </div>
               <p className="report-disclaimer">

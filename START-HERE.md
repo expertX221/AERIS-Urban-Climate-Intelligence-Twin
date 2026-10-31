@@ -13,7 +13,7 @@ The VS Code **Run and Debug → Start AERIS** configuration starts the same serv
 - Change the four sliders, then choose **View scenario results** for an explicit baseline/current comparison.
 - **Appearance and colors** changes the interface and actual 3D materials between Midnight, Verdigris and Dune.
 - Use rotate, zoom and reset camera buttons, or drag the model. Select a building to inspect the modeled height, use and storeys.
-- Save a scenario; change its inputs; **Restore saved scenario** retrieves it. Sharing opens a visible link with a copy button and an open-link action. JSON export includes inputs, computed results, scene and palette.
+- Save a scenario; change its inputs; **Restore saved scenario** retrieves it. Sharing opens a visible link with a copy button and an open-link action. PDF report export includes inputs, computed results, scene and palette.
 
 ## Project map
 
@@ -31,4 +31,6 @@ The opening artwork is a cinematic illustration. The explorer uses actual Blende
 
 ## New scenario library
 
-In the workspace, open **Scenario library & comparison**. Name and save the current inputs, load a named option, or import a previously exported AERIS scenario JSON file. The comparison table and CSV include baseline, current scenario and all library entries. Results reports also show land-cover changes at equal rainfall. All results remain synthetic demonstration values.
+In the workspace, open **Scenario library & comparison**. Name and save the current inputs, load a named option, or import a previously exported AERIS scenario JSON file. The comparison table and PDF report include baseline, current scenario and all library entries. Results reports also show land-cover changes at equal rainfall. All results remain synthetic demonstration values.
+
+Report download buttons now generate PDF files directly in the browser. Existing version 1 JSON files can still be imported; PDF reports are intended for reading and sharing.

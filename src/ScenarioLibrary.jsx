@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { defaults, evaluateScenario } from "./domain.js";
-import {
-  LIBRARY_KEY,
-  readLibrary,
-  importScenario,
-  comparisonCsv,
-} from "./library.js";
+import { LIBRARY_KEY, readLibrary, importScenario } from "./library.js";
 export function ScenarioLibrary({
   parameters,
   chapter,
@@ -24,7 +19,7 @@ export function ScenarioLibrary({
       return true;
     } catch {
       setError(
-        "Device storage is unavailable. Export the current scenario from the workspace to keep it.",
+        "Device storage is unavailable. Download a PDF report from the workspace to keep a record.",
       );
       return false;
     }
@@ -77,17 +72,14 @@ export function ScenarioLibrary({
     { name: "Current scenario", parameters },
     ...rows,
   ];
-  function exportCsv() {
-    const url = URL.createObjectURL(
-      new Blob(["\ufeff", comparisonCsv(comparisons)], {
-        type: "text/csv;charset=utf-8",
-      }),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "aeris-scenario-comparison.csv";
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  async function exportPdf() {
+    try {
+      const { createComparisonPdf } = await import("./pdf.js");
+      createComparisonPdf(comparisons).save("aeris-scenario-comparison.pdf");
+      notify("Comparison PDF downloaded.");
+    } catch {
+      setError("PDF export failed. Please try again.");
+    }
   }
   return (
     <div className="scenario-library">
@@ -205,8 +197,8 @@ export function ScenarioLibrary({
           </tbody>
         </table>
       </div>
-      <button className="primary-button" onClick={exportCsv}>
-        Export comparison CSV
+      <button className="primary-button" onClick={exportPdf}>
+        Download comparison PDF
       </button>
       <p className="report-disclaimer">
         Invented demonstration equations. No measured climate data or validated

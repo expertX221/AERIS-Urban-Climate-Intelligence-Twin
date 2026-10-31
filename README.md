@@ -19,7 +19,7 @@ Urban climate information is often fragmented across maps, charts and reports. A
 - Cinematic landing page following the selected dark city visual direction.
 - Four original Blender models: City, Heat, Water and Regeneration. Native scrolling changes the model and camera; chapters remain directly navigable.
 - Interactive Three.js explorer with orbit controls, object selection, keyboard-accessible inspection shortcuts and camera buttons.
-- Canopy, cool-roof, permeability and rainfall controls. Baseline comparison, device-local saving, parameterised share links and JSON export.
+- Canopy, cool-roof, permeability and rainfall controls. Baseline comparison, device-local saving, parameterised share links and PDF report export.
 - Optional original synthesized ambient audio and gentle click sounds. No autoplay. Audio mutes in background tabs.
 - Motion pause, reduced-motion support, responsive layouts, readable semantic content and a 2D fallback when WebGL/assets fail.
 
@@ -72,8 +72,10 @@ See `docs/submission.md` for a submission-ready project summary and demo flow, a
 
 - Open **Scenario library & comparison** in the workspace to save up to eight named scenarios on this device. Existing single-save and restore controls still work independently.
 - Import an exported version 1 AERIS JSON scenario (up to 64 KB). Inputs must be finite numbers within the documented ranges. Scene and palette are restored; supplied output values are ignored and recalculated.
-- Compare original baseline, current inputs and named scenarios in one accessible table; export that comparison as a CSV with spreadsheet formula protection.
+- Compare original baseline, current inputs and named scenarios in one accessible table; export that comparison as a readable PDF report.
 - Results now include an equal-rainfall comparison: original land cover and current land cover are evaluated at the same rainfall. This isolates intervention changes within the invented heuristic, rather than attributing a different storm to land-cover changes.
 - Corrected implementation links to the current repository and hardened saved-input handling for null values.
 
-Library entries remain browser-local. Export the current scenario JSON before moving devices or clearing browser data. Removing a library entry does not affect the current workspace or the independent single-save slot.
+Library entries remain browser-local. Download a PDF report to keep a readable record. PDF reports are not importable scenario backups. Removing a library entry does not affect the current workspace or the independent single-save slot.
+
+Report download buttons now generate PDF files directly in the browser. Existing version 1 JSON files can still be imported; PDF reports are intended for reading and sharing.
