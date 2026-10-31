@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { SceneBoundary } from "./SceneBoundary.jsx";
+import { Results } from "./Results.jsx";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -22,6 +23,8 @@ import {
   Info,
   CaretDown,
   GithubLogo,
+  Palette,
+  FloppyDisk,
 } from "@phosphor-icons/react";
 const Scene = lazy(() =>
   import("./Scene.jsx").then((m) => ({ default: m.Scene })),
@@ -34,6 +37,8 @@ import {
   readSaved,
   places,
   sanitize,
+  palettes,
+  presets,
 } from "./domain.js";
 import { setSound, clickSound } from "./audio.js";
 const icons = [Buildings, Thermometer, Drop, Leaf];
@@ -141,6 +146,29 @@ export function App() {
     selected = typeof selection === "string" ? places[selection] : selection,
     timeout = useRef();
   const [sceneStarted, setSceneStarted] = useState(app);
+  const [palette, setPalette] = useState(() => {
+    try {
+      const requested = new URLSearchParams(location.hash.split("?")[1]).get(
+        "palette",
+      );
+      if (palettes.some((p) => p.id === requested)) return requested;
+      return palettes.some(
+        (p) => p.id === localStorage.getItem("aeris-palette"),
+      )
+        ? localStorage.getItem("aeris-palette")
+        : "midnight";
+    } catch {
+      return "midnight";
+    }
+  });
+  const [presetName, setPresetName] = useState("Custom scenario");
+  const [shareCopied, setShareCopied] = useState(false);
+  const choosePalette = (id) => {
+    setPalette(id);
+    try {
+      localStorage.setItem("aeris-palette", id);
+    } catch {}
+  };
   const notify = (text) => {
     setToast(text);
     clearTimeout(timeout.current);
@@ -153,6 +181,8 @@ export function App() {
       if (q.has("canopy")) setParameters(sanitize(Object.fromEntries(q)));
       if (chapters.some((c) => c.id === q.get("scene")))
         setChapter(q.get("scene"));
+      if (palettes.some((p) => p.id === q.get("palette")))
+        setPalette(q.get("palette"));
     };
     addEventListener("hashchange", update);
     return () => removeEventListener("hashchange", update);
@@ -212,7 +242,10 @@ export function App() {
       document
         .getElementById(id)
         ?.scrollIntoView({ behavior: motion ? "smooth" : "instant" });
-    else setComparison(false);
+    else {
+      setComparison(false);
+      setSaved(false);
+    }
   };
   const launch = () => {
     location.hash = "app";
@@ -224,7 +257,8 @@ export function App() {
     setRoute("site");
     window.scrollTo(0, 0);
   };
-  const inspect = (name) => {
+  const inspect = (item) => {
+    const name = typeof item === "string" ? item : item.name;
     if (/Tree|park/i.test(name)) setSelection("park");
     else if (/River|Flood|Rain|Retention|bridge|promenade/i.test(name))
       setSelection("river");
@@ -232,6 +266,17 @@ export function App() {
       setSelection({
         ...places.tower,
         title: name.replaceAll("_", " ").replace(/ roof| windows|lights/g, ""),
+        ...(typeof item === "object" && item.height
+          ? {
+              body: `${item.use || "Mixed-use"} block in the illustrative Riverside district. Select a scenario to see how canopy and roof choices change the district response.`,
+              facts: [
+                ["Model height", `${item.height} units`],
+                ["Storeys", `${item.floors} · illustrative`],
+                ["Use", item.use || "Mixed-use"],
+                ["Data", "Synthetic district geometry"],
+              ],
+            }
+          : {}),
       });
     else setSelection("district");
     clickSound(sound);
@@ -244,6 +289,7 @@ export function App() {
           version: 1,
           parameters,
           chapter,
+          palette,
           savedAt: new Date().toISOString(),
           data: "simulated",
         }),
@@ -255,14 +301,46 @@ export function App() {
     }
   };
   const scenarioLink = () =>
-    `${location.origin}${location.pathname}#app?${new URLSearchParams({ ...parameters, scene: chapter })}`;
-  const share = async () => {
+    `${location.origin}${location.pathname}#app?${new URLSearchParams({ ...parameters, scene: chapter, palette })}`;
+  const copyShareLink = async () => {
     try {
       await navigator.clipboard.writeText(scenarioLink());
       notify("Scenario link copied.");
+      setShareCopied(true);
     } catch {
-      setModal("share");
+      notify("Copy the link from the field below.");
     }
+  };
+  const share = () => {
+    setShareCopied(false);
+    setModal("share");
+  };
+  const loadSaved = () => {
+    try {
+      const data = JSON.parse(localStorage.getItem("aeris-scenario"));
+      if (!data) {
+        notify("No saved scenario yet. Save one first.");
+        return;
+      }
+      setParameters(sanitize(data.parameters));
+      if (chapters.some((c) => c.id === data.chapter)) setChapter(data.chapter);
+      if (palettes.some((p) => p.id === data.palette))
+        choosePalette(data.palette);
+      setComparison(false);
+      setSaved(true);
+      setPresetName("Saved scenario");
+      notify("Saved scenario restored.");
+    } catch {
+      notify("Saved scenario could not be restored.");
+    }
+  };
+  const applyPreset = (preset) => {
+    setParameters({ ...preset.parameters });
+    setChapter(preset.scene);
+    setComparison(false);
+    setSaved(false);
+    setPresetName(preset.name);
+    setModal("results");
   };
   const exportScenario = () => {
     const data = {
@@ -272,6 +350,7 @@ export function App() {
         parameters,
         results,
         chapter,
+        palette,
         limitations:
           "Heuristic demonstration only. Not a validated forecast. No calibrated measurements.",
         createdAt: new Date().toISOString(),
@@ -290,6 +369,8 @@ export function App() {
   const setParam = (k, v) => {
     setSaved(false);
     setParameters((p) => ({ ...p, [k]: Number(v) }));
+    setComparison(false);
+    setPresetName("Custom scenario");
   };
   const firstSection = document.getElementById("city"),
     lastSection = document.getElementById("regeneration");
@@ -306,6 +387,7 @@ export function App() {
   return (
     <div
       className={app ? "app-shell" : "site-shell"}
+      data-palette={palette}
       onClick={(e) => {
         if (e.target.closest("button,a")) clickSound(sound);
       }}
@@ -338,6 +420,13 @@ export function App() {
           </div>
         )}
         <div className="header-actions">
+          <button
+            className="round-button appearance-button"
+            aria-label="Appearance and colors"
+            onClick={() => setModal("appearance")}
+          >
+            <Palette size={20} />
+          </button>
           {app ? (
             <button className="text-button back-site" onClick={home}>
               <ArrowLeft size={16} /> Back to story
@@ -372,7 +461,9 @@ export function App() {
         <div className="stage-caption">
           <span className="live-dot" /> {chapters[index].title.toUpperCase()} /
           ORIGINAL 3D DISTRICT{" "}
-          <span className="stage-caption-detail">BLENDER → GLTF</span>
+          <span className="stage-caption-detail">
+            RIVERSIDE / SPATIAL EXPLORER
+          </span>
         </div>
         <SceneBoundary onError={setSceneStatus}>
           <Suspense
@@ -390,6 +481,7 @@ export function App() {
                 app={app}
                 motion={motion}
                 parameters={comparison ? defaults : parameters}
+                palette={palette}
                 onSelect={inspect}
                 onStatus={setSceneStatus}
               />
@@ -620,6 +712,31 @@ export function App() {
             <p className="muted">
               Adjust the district. Explore the trade-offs.
             </p>
+            <div className="preset-heading">
+              <span>START WITH A POSSIBILITY</span>
+              <span>01—03</span>
+            </div>
+            <div className="preset-list">
+              {presets.map((preset, i) => {
+                const Icon = [Thermometer, Drop, Leaf][i];
+                return (
+                  <button key={preset.id} onClick={() => applyPreset(preset)}>
+                    <Icon size={18} />
+                    <span>
+                      <strong>{preset.name}</strong>
+                      <small>{preset.description}</small>
+                    </span>
+                    <ArrowUpRight size={15} />
+                  </button>
+                );
+              })}
+            </div>
+            <div className="workspace-mode" role="status">
+              <span className="live-dot" />
+              {comparison
+                ? "BASELINE VIEW · original parameters"
+                : "SCENARIO VIEW · your parameters"}
+            </div>
             <div className="parameters">
               {[
                 ["canopy", "Tree canopy", Tree, "%"],
@@ -690,6 +807,12 @@ export function App() {
               </div>
             </div>
             <button
+              className="primary-button run-scenario"
+              onClick={() => setModal("results")}
+            >
+              View scenario results <ArrowRight size={18} />
+            </button>
+            <button
               className={`compare-button ${comparison ? "comparing" : ""}`}
               aria-pressed={comparison}
               onClick={() => setComparison(!comparison)}
@@ -699,6 +822,9 @@ export function App() {
                 : "Compare with baseline"}{" "}
               <ArrowRight size={18} />
             </button>
+            <button className="load-saved text-button" onClick={loadSaved}>
+              <FloppyDisk size={15} /> Restore saved scenario
+            </button>
             <div className="save-row">
               <button className="primary-button" onClick={save}>
                 <Check size={17} />{" "}
@@ -707,7 +833,7 @@ export function App() {
               <button
                 className="round-button"
                 onClick={share}
-                aria-label="Copy shareable scenario link"
+                aria-label="Share scenario"
               >
                 <Copy size={18} />
               </button>
@@ -774,6 +900,7 @@ export function App() {
                 setParameters(defaults);
                 setSaved(false);
                 setComparison(false);
+                setPresetName("Baseline scenario");
                 notify("Baseline parameters restored.");
               }}
             >
@@ -818,16 +945,80 @@ export function App() {
       )}
       {modal && (
         <Modal
+          key={modal}
           title={
             modal === "research"
               ? "Possibilities, with assumptions in view."
               : modal === "share"
                 ? "Share this scenario"
-                : selected.title
+                : modal === "results"
+                  ? "Make the difference visible."
+                  : modal === "appearance"
+                    ? "A different light on your city."
+                    : selected.title
           }
           onClose={() => setModal(null)}
         >
-          {modal === "research" ? (
+          {modal === "results" ? (
+            <>
+              <Results
+                parameters={parameters}
+                name={presetName}
+                onMethod={() => setModal("research")}
+              />
+              <div className="report-actions">
+                <button
+                  className="primary-button"
+                  onClick={() => setModal(null)}
+                >
+                  Explore this scenario <ArrowRight size={18} />
+                </button>
+                <button className="text-button" onClick={exportScenario}>
+                  Export results <DownloadSimple size={16} />
+                </button>
+              </div>
+              <p className="report-disclaimer">
+                Demonstration values from an invented heuristic. Baseline uses
+                20% canopy, 15% roofs, 20% permeability and 60 mm rainfall.
+                These are not validated climate estimates.
+              </p>
+            </>
+          ) : modal === "appearance" ? (
+            <>
+              <p>
+                Choose a coordinated material and interface palette. The
+                district stays interactive in every view.
+              </p>
+              <div className="palette-choices">
+                {palettes.map((p) => (
+                  <button
+                    key={p.id}
+                    className={`palette-choice palette-${p.id}`}
+                    aria-pressed={palette === p.id}
+                    onClick={() => choosePalette(p.id)}
+                  >
+                    <span className="palette-swatches">
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                    <span>
+                      <strong>{p.name}</strong>
+                      <small>{p.description}</small>
+                    </span>
+                    {palette === p.id ? (
+                      <Check size={18} />
+                    ) : (
+                      <ArrowRight size={18} />
+                    )}
+                  </button>
+                ))}
+              </div>
+              <button className="primary-button" onClick={() => setModal(null)}>
+                Return to the city <ArrowRight size={18} />
+              </button>
+            </>
+          ) : modal === "research" ? (
             <>
               <p>
                 AERIS is a hackathon research prototype in ClimateTech &
@@ -886,10 +1077,25 @@ export function App() {
               <p>Copy this link to reopen the same scenario parameters.</p>
               <input
                 className="share-input"
+                aria-label="Scenario link"
                 readOnly
                 value={scenarioLink()}
                 onFocus={(e) => e.target.select()}
               />
+              <div className="report-actions">
+                <button className="primary-button" onClick={copyShareLink}>
+                  {shareCopied ? <Check size={17} /> : <Copy size={17} />}{" "}
+                  {shareCopied ? "Copied" : "Copy scenario link"}
+                </button>
+                <a
+                  className="text-button"
+                  href={scenarioLink()}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open shared scenario <ArrowUpRight size={16} />
+                </a>
+              </div>
             </>
           ) : (
             <>

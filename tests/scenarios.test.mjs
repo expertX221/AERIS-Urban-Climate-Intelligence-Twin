@@ -7,6 +7,26 @@ import {
   evaluateScenario,
   sanitize,
 } from "../src/domain.js";
+import { presets, scenarioReport, palettes } from "../src/domain.js";
+test("each scenario preset returns a distinct explainable result", () => {
+  const cool = scenarioReport(presets.find((p) => p.id === "cool").parameters);
+  const storm = scenarioReport(
+    presets.find((p) => p.id === "storm").parameters,
+  );
+  const sponge = scenarioReport(
+    presets.find((p) => p.id === "sponge").parameters,
+  );
+  assert.equal(cool.surface, 38.9);
+  assert.equal(cool.runoff, 65);
+  assert.equal(storm.surface, 41.8);
+  assert.equal(storm.runoff, 144);
+  assert.equal(storm.runoffPercent, 100);
+  assert.equal(sponge.surface, 38.5);
+  assert.equal(sponge.runoff, 42);
+  assert.equal(sponge.runoffPercent, -42);
+  assert.equal(palettes.length, 3);
+  assert.equal(new Set(palettes.map((p) => p.id)).size, 3);
+});
 test("baseline and intervention direction remain consistent", () => {
   assert.deepEqual(evaluateScenario(defaults), baseline);
   const improved = evaluateScenario({
@@ -55,6 +75,10 @@ test("all four GLBs contain actual distinct geometry and materials", async () =>
     assert.ok(g.meshes.length > 50);
     assert.ok(g.nodes.some((n) => n.name.startsWith("Building_")));
     assert.ok(g.nodes.some((n) => n.name.startsWith("Tree_canopy")));
+    assert.ok(g.nodes.some((n) => n.name.startsWith("Detail_")));
+    assert.ok(
+      g.nodes.some((n) => n.extras?.height_units > 0 && n.extras?.floors > 0),
+    );
     if (id === "heat")
       assert.ok(
         g.materials.some((m) =>

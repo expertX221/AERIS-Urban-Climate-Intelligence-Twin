@@ -2,6 +2,14 @@
 
 An immersive ClimateTech & Sustainability hackathon prototype for THREWS ODYSSEY 2026. A cinematic website connects directly to a 3D climate scenario workspace.
 
+## Version 0.2 refinements
+
+Detailed architectural models now include facade framing, balconies, roof terraces, bridge cables, a park pavilion and riverside lighting. Three coordinated palettes (Midnight, Verdigris and Dune) change the actual 3D materials and interface. Water scenes include moving river tracers and rainfall for wetter scenarios. Motion remains optional.
+
+Three working presets open explicit result reports: Cooler streets, Cloudburst and Sponge district. Sliders update the model and response; View scenario results shows a readable baseline/current/change table. Save/restore, visible share-link dialog, export, rotate, zoom and reset camera actions provide clear outcomes. Model selection can display geometry metadata.
+
+For a portable VS Code setup, start with `START-HERE.md` and `AERIS.code-workspace`. The source ZIP includes editable Blender files and runtime assets but excludes credentials, dependencies and Git history.
+
 ## Problem
 
 Urban climate information is often fragmented across maps, charts and reports. AERIS explores whether an interactive spatial story can help people understand the relationships between built form, vegetation, surface heat and water, and compare possible interventions with transparent assumptions.
@@ -34,7 +42,7 @@ Rebuild the assets using the installed Blender executable:
 blender --background --python scripts/create-models.py
 ```
 
-Editable sources: `blender/aeris-city.blend`, `aeris-heat.blend`, `aeris-water.blend`, `aeris-regeneration.blend`. Runtime geometry: `public/models/*.glb` (approximately 1.2–1.5 MB each). Geometry is deterministic, generated with seed 47. No proprietary buildings or textures are imported.
+Editable sources: `blender/aeris-city.blend`, `aeris-heat.blend`, `aeris-water.blend`, `aeris-regeneration.blend`. Runtime geometry: `public/models/*.glb` (approximately 1.8–2.1 MB each). Geometry is deterministic, generated with seed 47 and detailed with seed 72. Run `scripts/enhance-models.py` in Blender after the base generation pass. No proprietary buildings or textures are imported.
 
 ## Data, equations and limitations
 

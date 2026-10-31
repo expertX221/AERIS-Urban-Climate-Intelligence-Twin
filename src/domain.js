@@ -46,6 +46,56 @@ export const chapters = [
 ];
 export const defaults = { canopy: 20, roofs: 15, drainage: 20, rainfall: 60 };
 export const baseline = { surface: 41.8, runoff: 72 };
+export const palettes = [
+  {
+    id: "midnight",
+    name: "Midnight",
+    description: "Ink, copper & glacier blue",
+  },
+  {
+    id: "verdigris",
+    name: "Verdigris",
+    description: "Deep forest, jade & brass",
+  },
+  { id: "dune", name: "Dune", description: "Sandstone, terracotta & blue" },
+];
+export const presets = [
+  {
+    id: "cool",
+    name: "Cooler streets",
+    scene: "heat",
+    icon: "heat",
+    parameters: { canopy: 60, roofs: 45, drainage: 20, rainfall: 60 },
+    description: "More canopy and reflective roofs.",
+  },
+  {
+    id: "storm",
+    name: "Cloudburst",
+    scene: "water",
+    icon: "water",
+    parameters: { canopy: 20, roofs: 15, drainage: 20, rainfall: 120 },
+    description: "Double the illustrative rainfall.",
+  },
+  {
+    id: "sponge",
+    name: "Sponge district",
+    scene: "regeneration",
+    icon: "leaf",
+    parameters: { canopy: 60, roofs: 60, drainage: 70, rainfall: 60 },
+    description: "A greener, more permeable district.",
+  },
+];
+export function scenarioReport(input) {
+  const result = evaluateScenario(input);
+  return {
+    ...result,
+    temperatureDelta: +(result.surface - baseline.surface).toFixed(1),
+    runoffDelta: result.runoff - baseline.runoff,
+    runoffPercent: Math.round(
+      ((result.runoff - baseline.runoff) / baseline.runoff) * 100,
+    ),
+  };
+}
 export function sanitize(input = {}) {
   return Object.fromEntries(
     Object.entries(defaults).map(([k, v]) => [
@@ -63,9 +113,9 @@ export function sanitize(input = {}) {
 export function evaluateScenario(input) {
   const p = sanitize(input);
   return {
-    surface: +(41.8 - (p.canopy - 20) * 0.055 - (p.roofs - 15) * 0.025).toFixed(
-      1,
-    ),
+    surface:
+      Math.round((41800 - (p.canopy - 20) * 55 - (p.roofs - 15) * 25) / 100) /
+      10,
     runoff: Math.round(
       Math.max(
         0,

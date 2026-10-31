@@ -1,0 +1,14 @@
+{
+  "folders": [{ "path": "." }],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/*.blend1": true,
+    },
+    "editor.formatOnSave": true,
+  },
+  "extensions": {
+    "recommendations": ["esbenp.prettier-vscode", "ms-python.python"],
+  },
+}

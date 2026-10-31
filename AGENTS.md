@@ -2,6 +2,8 @@
 
 ## AERIS decisions
 
+Refinement request: make the existing direction more elegant and colorful, improve architectural detail, fix unclear/non-working controls and show visible results for options. Preserve the approved dark cinematic hero; add coordinated material palettes, explicit result reports, working scenario presets and a portable VS Code ZIP. No new visual concept selection is needed for these scoped refinements.
+
 The user selected generated visual option 1 (dark cinematic river city, cyan accents, warm windows, editorial serif heading). Preserve this direction. Product: Urban Climate Intelligence Twin, ClimateTech & Sustainability. Four native Blender scenes, clickable object inspection, smooth scroll choreography and optional ambient audio. The website and scenario workspace share one React application. Scenario data and equations are illustrative and must remain labeled. Deploy to the user's AERIS- GitHub repository and Vercel; Neon is unnecessary until shared server persistence is requested.
 
 Run the local server yourself and open the preview in the browser available to this environment. Do not give the user server-start instructions when you can run it.
