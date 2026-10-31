@@ -58,7 +58,7 @@ export function Scene({
       renderer.domElement.setAttribute("role", "img");
       const scene = new THREE.Scene(),
         camera = new THREE.PerspectiveCamera(37, 1, 0.1, 180);
-      camera.position.set(29, 25, 31);
+      camera.position.set(...(innerWidth < 760 ? [36, 30, 38] : [29, 25, 31]));
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.enableZoom = false;
@@ -128,7 +128,9 @@ export function Scene({
         }
       };
       const reset = () => {
-        camera.position.set(29, 25, 31);
+        camera.position.set(
+          ...(innerWidth < 760 ? [36, 30, 38] : [29, 25, 31]),
+        );
         controls.target.set(0, 1, 0);
         controls.update();
       };
